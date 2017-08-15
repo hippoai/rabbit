@@ -1,8 +1,6 @@
 package rabbit
 
 import (
-	"log"
-
 	"github.com/hippoai/goutil"
 	"github.com/streadway/amqp"
 )
@@ -102,21 +100,13 @@ func (wq *WorkerQueue) Listen(cb func([]byte) error, cbError func(err error)) er
 		false, false, false, nil,
 	)
 
-	// Channel in order to block
-	forever := make(chan bool)
-
 	// Read messages forever
-	go func() {
-		for d := range msgs {
-			err := cb(d.Body)
-			if err != nil {
-				cbError(err)
-			}
+	for d := range msgs {
+		err := cb(d.Body)
+		if err != nil {
+			cbError(err)
 		}
-	}()
-
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C \n")
-	<-forever
+	}
 
 	return nil
 
